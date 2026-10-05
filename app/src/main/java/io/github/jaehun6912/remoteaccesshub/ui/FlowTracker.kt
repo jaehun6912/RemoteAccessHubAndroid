@@ -290,6 +290,14 @@ object ActionGate {
      */
     fun shouldBlinkConnect(setting: Boolean, power: PcPowerState, connectEnabled: Boolean, busy: Boolean, exiting: Boolean): Boolean =
         setting && power == PcPowerState.On && connectEnabled && !busy && !exiting
+
+    /**
+     * [공유기 화면] 버튼을 주황색으로 깜빡여 로그인하라고 알릴 때인지.
+     * 공유기가 "인증되지 않음"이라고 확정한 경우(로그아웃·세션 만료)만 깜빡인다. 아직 확인 전이면 깜빡이지 않는다.
+     * 공유기 화면을 띄워 둔 동안에는 그 버튼이 보이지 않으므로 의미가 없고, [종료] 중에는 멈춘다.
+     */
+    fun shouldBlinkRouter(session: SessionState, routerVisible: Boolean, exiting: Boolean): Boolean =
+        session == SessionState.LoggedOut && !routerVisible && !exiting
 }
 
 data class ModeOption(val mode: ConnectMode, val title: String, val detail: String, val enabled: Boolean)

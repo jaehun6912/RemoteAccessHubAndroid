@@ -269,6 +269,17 @@ class UiModelTest {
     }
 
     @Test
+    fun router_button_blinks_orange_only_when_the_router_says_logged_out() {
+        assertTrue(ActionGate.shouldBlinkRouter(SessionState.LoggedOut, routerVisible = false, exiting = false))
+        // 아직 확인 전이거나 로그인돼 있으면 깜빡이지 않는다.
+        assertFalse(ActionGate.shouldBlinkRouter(SessionState.Unknown, routerVisible = false, exiting = false))
+        assertFalse(ActionGate.shouldBlinkRouter(SessionState.LoggedIn, routerVisible = false, exiting = false))
+        // 공유기 화면을 띄워 둔 동안(버튼이 가려짐)이나 [종료] 중에는 멈춘다.
+        assertFalse(ActionGate.shouldBlinkRouter(SessionState.LoggedOut, routerVisible = true, exiting = false))
+        assertFalse(ActionGate.shouldBlinkRouter(SessionState.LoggedOut, routerVisible = false, exiting = true))
+    }
+
+    @Test
     fun mode_options_check_only_their_own_settings() {
         val s = AppSettings(publicHost = "myhome.iptime.org", publicRdpPort = 41000)
         val o = ModeOptions.forSettings(s)

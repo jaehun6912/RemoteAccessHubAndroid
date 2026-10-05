@@ -134,6 +134,7 @@ class AppController(
     var routerVisible by mutableStateOf(false); private set
     var logVisible by mutableStateOf(false); private set
     var blinkConnect by mutableStateOf(false); private set
+    var blinkRouter by mutableStateOf(false); private set
     var preparingAdmin by mutableStateOf(false); private set
     var modeSheet by mutableStateOf<ModeSheet?>(null); private set
     var dialog by mutableStateOf<AppDialog?>(null); private set
@@ -213,6 +214,7 @@ class AppController(
             },
         )
         blinkConnect = ActionGate.shouldBlinkConnect(settings.blinkConnectWhenPcOn, p.state, gate.connect, busy, exiting)
+        blinkRouter = ActionGate.shouldBlinkRouter(browser.session.state, routerVisible, exiting)
     }
 
     // ================================================================== 초기화

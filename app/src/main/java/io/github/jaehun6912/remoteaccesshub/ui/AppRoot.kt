@@ -278,11 +278,7 @@ private fun MainScreen(c: AppController, modifier: Modifier) {
         }
         Spacer(Modifier.height(4.dp))
         Row {
-            TextButton(onClick = { c.toggleRouter() }) {
-                Icon(AppIcons.Router, null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(6.dp))
-                Text("공유기 화면")
-            }
+            RouterButton(c)
             Spacer(Modifier.weight(1f))
             TextButton(onClick = { c.showLog(!c.logVisible) }) {
                 Icon(AppIcons.Log, null, modifier = Modifier.size(18.dp))
@@ -298,17 +294,20 @@ private fun MainScreen(c: AppController, modifier: Modifier) {
     }
 }
 
-/** [PC 접속]: PC가 켜진 것이 확인되면 서서히 밝아졌다 어두워진다(Windows 버전과 같은 2.2초 주기). */
+/** 서서히 밝아졌다 어두워지는 강조 정도(0~1, Windows 버전과 같은 2.2초 주기). 꺼져 있으면 0. */
+@Composable
+private fun breathingLevel(active: Boolean): Float {
+    if (!active) return 0f
+    val t = rememberInfiniteTransition(label = "breathing")
+    val v by t.animateFloat(0f, 1f, infiniteRepeatable(tween(1100, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "level")
+    return v
+}
+
+/** [PC 접속]: PC가 켜진 것이 확인되면 초록색으로 서서히 밝아졌다 어두워진다. */
 @Composable
 private fun ConnectButton(c: AppController, modifier: Modifier) {
     val p = LocalPalette.current
-    val level = if (c.blinkConnect) {
-        val t = rememberInfiniteTransition(label = "blink")
-        val v by t.animateFloat(0f, 1f, infiniteRepeatable(tween(1100, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "level")
-        v
-    } else {
-        0f
-    }
+    val level = breathingLevel(c.blinkConnect)
     OutlinedButton(
         onClick = { c.showModeSheet(wakeFirst = false) },
         enabled = c.gate.connect,
@@ -320,6 +319,30 @@ private fun ConnectButton(c: AppController, modifier: Modifier) {
         Icon(AppIcons.Monitor, null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
         Text("PC 접속")
+    }
+}
+
+/**
+ * [공유기 화면]: 공유기 로그인이 풀려 있으면(공유기가 "인증되지 않음"으로 응답) [PC 접속]과 같은 효과로
+ * 주황색이 서서히 밝아졌다 어두워져, 눌러서 다시 로그인하라고 알린다.
+ */
+@Composable
+private fun RouterButton(c: AppController) {
+    val p = LocalPalette.current
+    val level = breathingLevel(c.blinkRouter)
+    TextButton(
+        onClick = { c.toggleRouter() },
+        shape = RoundedCornerShape(10.dp),
+        border = if (c.blinkRouter) BorderStroke(1.dp, lerp(p.border, p.warning, level)) else null,
+        colors = ButtonDefaults.textButtonColors(
+            containerColor = p.warning.copy(alpha = 0.28f * level),
+            contentColor = if (c.blinkRouter) p.warning else p.accent,
+        ),
+        modifier = Modifier.semantics { if (c.blinkRouter) contentDescription = "공유기 화면. 공유기 로그인이 필요합니다" },
+    ) {
+        Icon(AppIcons.Router, null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text("공유기 화면")
     }
 }
 

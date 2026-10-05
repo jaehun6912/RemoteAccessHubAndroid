@@ -1,0 +1,31 @@
+name: build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # 단위 검사와 APK 빌드. 모의 공유기 계측 검사는 에뮬레이터가 필요해 로컬에서 build.ps1 -SelfTest로 돌린다.
+      # CI에는 배포용 서명 키가 없어 release APK는 실행마다 새로 만든 디버그 키로 서명된다(시험용).
+      - name: Build and unit tests
+        run: chmod +x gradlew && ./gradlew --no-daemon :app:testDebugUnitTest :app:assembleDebug :app:assembleRelease
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RemoteAccessHub-android
+          path: app/build/outputs/apk/**/*.apk
+          retention-days: 14

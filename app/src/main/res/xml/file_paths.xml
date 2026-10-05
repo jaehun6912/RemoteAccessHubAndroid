@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 원격 데스크톱 앱에 넘길 .rdp 파일(비밀번호 없음, 주소·포트만)을 두는 캐시 폴더 -->
+<paths>
+    <cache-path name="rdp" path="rdp/" />
+</paths>

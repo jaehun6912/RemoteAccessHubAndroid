@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Windows 아이콘(tools/make-icon.ps1)의 256 기준 도안을 108 단위 적응형 아이콘 안전 영역에 옮겼다: 흰 모니터, 어두운 화면, 초록 전원 표시. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 모니터 테두리 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30.9,29.8 L77.1,29.8 A4.9,4.9 0 0 1 82,34.7 L82,64.1 A4.9,4.9 0 0 1 77.1,69 L30.9,69 A4.9,4.9 0 0 1 26,64.1 L26,34.7 A4.9,4.9 0 0 1 30.9,29.8 Z" />
+    <!-- 화면 -->
+    <path
+        android:fillColor="#1D2C1D"
+        android:pathData="M31.95,33.65 L76.05,33.65 A2.1,2.1 0 0 1 78.15,35.75 L78.15,63.05 A2.1,2.1 0 0 1 76.05,65.15 L31.95,65.15 A2.1,2.1 0 0 1 29.85,63.05 L29.85,35.75 A2.1,2.1 0 0 1 31.95,33.65 Z" />
+    <!-- 받침 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M49.1,69 L58.9,69 L58.9,75.3 L49.1,75.3 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,74.6 L68,74.6 A2.8,2.8 0 0 1 70.8,77.4 L70.8,77.4 A2.8,2.8 0 0 1 68,80.2 L40,80.2 A2.8,2.8 0 0 1 37.2,77.4 L37.2,77.4 A2.8,2.8 0 0 1 40,74.6 Z" />
+    <!-- 전원 표시: 위쪽이 트인 원호 + 세로 막대 -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#A5D66A"
+        android:strokeWidth="3.85"
+        android:strokeLineCap="round"
+        android:pathData="M58.55,41.92 A9.1,9.1 0 1 1 49.45,41.92" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#A5D66A"
+        android:strokeWidth="3.85"
+        android:strokeLineCap="round"
+        android:pathData="M54,38.6 L54,47.98" />
+</vector>

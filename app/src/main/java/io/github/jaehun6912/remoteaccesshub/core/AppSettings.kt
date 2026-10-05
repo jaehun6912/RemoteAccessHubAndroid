@@ -27,6 +27,18 @@ enum class PowerSource {
     Off,
 }
 
+/**
+ * 크롬 원격 데스크톱을 무엇으로 열지.
+ * 크롬 원격 데스크톱 안드로이드 앱은 주소를 받아도 특정 PC로 바로 가지 않고 첫 화면(기기 목록)만 연다(2026-10-05 실기기 확인).
+ */
+enum class CrdOpenWith {
+    /** 기기 ID가 있으면 브라우저(Chrome)로 그 PC의 세션 주소를 바로 열고, 없으면 앱(없으면 브라우저)의 기기 목록을 연다. */
+    Auto,
+
+    /** 항상 앱으로 연다(기기 목록에서 직접 고른다). 앱이 없으면 브라우저. */
+    App,
+}
+
 /** 크롬 원격 데스크톱으로 접속할 때 PC가 켜졌는지 확인하는 방법. */
 enum class CrdBootCheck {
     /** 확인하지 않고 바로 연다(크롬 원격 데스크톱은 열어 둘 포트가 없다). */
@@ -66,6 +78,8 @@ data class AppSettings(
     @SerialName("CrdHostId") var crdHostId: String = "",
     /** "none" | "direct". 부팅 확인 방법. */
     @SerialName("CrdBootCheckMode") var crdBootCheckMode: String = "none",
+    /** "auto" | "app". 크롬 원격 데스크톱을 무엇으로 열지(안드로이드 전용). */
+    @SerialName("CrdOpenWith") var crdOpenWith: String = "auto",
 
     // --- PC 전원 상태 배지 ---
     /** "auto" | "direct" | "off". 안드로이드 버전에서 "auto"는 "direct"와 같다. */
@@ -114,6 +128,9 @@ data class AppSettings(
 
     val crdCheck: CrdBootCheck
         get() = if (crdBootCheckMode.trim().lowercase(Locale.ROOT) == "direct") CrdBootCheck.Direct else CrdBootCheck.None
+
+    val crdOpen: CrdOpenWith
+        get() = if (crdOpenWith.trim().lowercase(Locale.ROOT) == "app") CrdOpenWith.App else CrdOpenWith.Auto
 
     val lastMode: ConnectMode
         get() = if (lastConnectMode.trim().lowercase(Locale.ROOT) == "crd") ConnectMode.Crd else ConnectMode.Direct

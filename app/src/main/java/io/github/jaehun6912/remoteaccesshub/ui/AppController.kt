@@ -225,6 +225,13 @@ class AppController(
                 onUiTick()
             }
         }
+        // 공유기 화면에서 로그인하는 동안에는 공유기 API 기록을 자주 읽어 로그인 요청을 바로 알아챈다(1초 주기보다 빠르게).
+        scope.launch {
+            while (isActive) {
+                delay(300)
+                if (initDone && browser.isReady && routerVisible && !browser.session.isLoggedIn && !busy) browser.network.sync()
+            }
+        }
     }
 
     private suspend fun initialize() {
@@ -373,6 +380,7 @@ class AppController(
         lastSettle = null
         val sig = CancelSignal().withTimeout(3 * 60_000)
         settleSignal = sig
+        val settleStart = io.github.jaehun6912.remoteaccesshub.core.Mono.now()
         // "관리 화면이 준비됐습니다"가 뜨기 전에는 동작 버튼을 막는다([관리도구] 자동 선택과 겹치지 않도록).
         setAdminPreparing(true)
         try {
@@ -403,6 +411,7 @@ class AppController(
                 setStatus("로그인은 확인됐지만 관리 화면을 확인하지 못했습니다. 필요하면 공유기 화면에서 [관리도구]를 누르세요.", BannerKind.Warning)
                 log.warn("관리 화면 확인 실패: ${nav.message}")
             }
+            log.info("관리 화면 준비 끝: ${nav.status}, ${"%.1f".format((io.github.jaehun6912.remoteaccesshub.core.Mono.now() - settleStart) / 1000.0)}초")
             refreshUi()
             lastSettle = nav
             return nav
@@ -441,7 +450,7 @@ class AppController(
         }
         if (c.method == "session/login" || c.method == "session/logout") {
             scope.launch {
-                delay(400)
+                delay(150)
                 if (!busy) probeSessionNow()
             }
         }
@@ -605,6 +614,7 @@ class AppController(
 
         // 로그인 후 화면 준비 작업과 동시에 공유기 화면을 조작하지 않도록 먼저 멈춘다.
         settleSignal?.cancel()
+        val wakeStart = io.github.jaehun6912.remoteaccesshub.core.Mono.now()
         flow.onWolStarted()
         val sig = beginOperation()
         wakeRunning = true
@@ -623,6 +633,7 @@ class AppController(
         }
 
         flow.onWolOutcome(outcome, OffsetDateTime.now())
+        log.info("PC 켜기 끝: ${if (outcome.success) "성공" else "실패"}, ${"%.1f".format((io.github.jaehun6912.remoteaccesshub.core.Mono.now() - wakeStart) / 1000.0)}초")
         if (outcome.success) {
             log.info("WOL 완료: ${outcome.message}")
             power.checkSoon(20_000) // 부팅할 시간을 조금 준 뒤 전원 배지를 갱신
@@ -703,7 +714,7 @@ class AppController(
     /** 설정 화면의 [기기 목록 열기]: 크롬 원격 데스크톱 기기 목록을 연다. */
     fun openCrdDeviceList() {
         try {
-            crd.open(null)
+            crd.open(null, settings.crdOpen)
         } catch (e: Exception) {
             log.warn("크롬 원격 데스크톱을 열지 못했습니다: ${e.message}")
         }
@@ -936,6 +947,28 @@ class AppController(
             AppSettings.fromExportJson(text)
         } catch (e: Exception) {
             null to "가져오지 못했습니다: ${e.message}"
+        }
+    }
+
+    /**
+     * [기록 공유]: 화면 기록(주소·MAC·비밀번호 후보는 가림)을 다른 앱으로 보낸다. 받는 앱은 사용자가 고른다.
+     * 실기기에서 느린 단계나 실패 원인을 알려 줄 때 쓴다(단계별 경과 시간이 들어 있다).
+     */
+    fun shareLog() {
+        val text = buildString {
+            appendLine("RemoteAccessHub Android ${BuildConfig.VERSION_NAME} 기록 (Android ${Build.VERSION.RELEASE}, ${Build.MANUFACTURER} ${Build.MODEL})")
+            for (e in log.snapshot(800)) {
+                if (e.level != LogLevel.Debug) appendLine(DiagnosticsExporter.maskHostsInText(e.format(), settings))
+            }
+        }
+        val send = android.content.Intent(android.content.Intent.ACTION_SEND)
+            .setType("text/plain")
+            .putExtra(android.content.Intent.EXTRA_SUBJECT, "RemoteAccessHub 기록")
+            .putExtra(android.content.Intent.EXTRA_TEXT, text)
+        try {
+            activity.startActivity(android.content.Intent.createChooser(send, "기록 공유"))
+        } catch (e: Exception) {
+            setStatus("기록을 공유하지 못했습니다: ${e.message}", BannerKind.Warning)
         }
     }
 

@@ -19,6 +19,7 @@
             <data android:scheme="https" />
         </intent>
         <package android:name="com.google.chromeremotedesktop" />
+        <package android:name="com.android.chrome" />
         <package android:name="com.microsoft.rdc.androidx" />
     </queries>
 

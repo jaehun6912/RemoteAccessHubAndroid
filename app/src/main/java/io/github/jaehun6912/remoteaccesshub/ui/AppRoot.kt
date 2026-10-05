@@ -286,7 +286,10 @@ private fun MainScreen(c: AppController, modifier: Modifier) {
                 Text(if (c.logVisible) "기록 숨기기" else "기록")
             }
         }
-        if (c.logVisible) LogPanel(c.logLines)
+        if (c.logVisible) {
+            LogPanel(c.logLines)
+            TextButton(onClick = { c.shareLog() }, modifier = Modifier.align(Alignment.End)) { Text("기록 공유(주소·MAC 가림)") }
+        }
         Spacer(Modifier.height(16.dp))
     }
 }

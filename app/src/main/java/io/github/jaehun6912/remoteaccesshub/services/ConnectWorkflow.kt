@@ -5,6 +5,7 @@ import io.github.jaehun6912.remoteaccesshub.core.AppSettings
 import io.github.jaehun6912.remoteaccesshub.core.CancelSignal
 import io.github.jaehun6912.remoteaccesshub.core.ConnectMode
 import io.github.jaehun6912.remoteaccesshub.core.CrdBootCheck
+import io.github.jaehun6912.remoteaccesshub.core.CrdOpenWith
 import io.github.jaehun6912.remoteaccesshub.core.InputRules
 import io.github.jaehun6912.remoteaccesshub.core.Mono
 import io.github.jaehun6912.remoteaccesshub.core.OperationCanceledException
@@ -79,11 +80,11 @@ enum class CrdOpenTarget {
 
 interface CrdLauncher {
     /**
-     * 크롬 원격 데스크톱을 연다. 휴대폰에 앱이 설치되어 있으면 앱으로, 없으면 브라우저로 연다.
-     * 기기 ID가 있으면 그 기기의 세션 주소를, 없으면 기기 목록 화면을 연다.
-     * 구글 로그인과 PIN 입력은 사용자가 직접 한다.
+     * 크롬 원격 데스크톱을 연다. 기기 ID가 있으면 그 기기의 세션 주소를, 없으면 기기 목록 화면을 연다.
+     * [openWith]가 Auto면 기기 ID가 있을 때 브라우저로 그 PC를 바로 열고(앱은 특정 PC로 바로 가지 못함),
+     * 기기 ID가 없거나 App이면 앱(없으면 브라우저)을 연다. 구글 로그인과 PIN 입력은 사용자가 직접 한다.
      */
-    fun open(hostId: String?): CrdOpenTarget
+    fun open(hostId: String?, openWith: CrdOpenWith = CrdOpenWith.Auto): CrdOpenTarget
 }
 
 /**
@@ -119,7 +120,7 @@ class ConnectWorkflow(
                     responded = true
                 }
                 progress?.invoke(ConnectProgress(ConnectStage.LaunchingCrd, "크롬 원격 데스크톱을 여는 중..."))
-                val opened = crd.open(settings.crdHostId)
+                val opened = crd.open(settings.crdHostId, settings.crdOpen)
                 val where = if (InputRules.normalizeCrdHostId(settings.crdHostId) == null) "기기 목록" else "저장된 기기"
                 val how = when (opened) {
                     CrdOpenTarget.App -> "크롬 원격 데스크톱 앱을 열었습니다($where)."

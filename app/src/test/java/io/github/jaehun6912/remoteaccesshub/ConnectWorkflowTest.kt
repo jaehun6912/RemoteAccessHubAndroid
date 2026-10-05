@@ -184,6 +184,19 @@ class ConnectWorkflowTest {
     }
 
     @Test
+    fun crd_open_preference_is_passed_to_the_launcher() = runBlocking {
+        val m = make()
+        m.wf.run(crdSettings(), ConnectMode.Crd, null, CancelSignal())
+        assertEquals(io.github.jaehun6912.remoteaccesshub.core.CrdOpenWith.Auto, m.crd.lastOpenWith)
+        m.wf.run(crdSettings().copy(crdOpenWith = "app"), ConnectMode.Crd, null, CancelSignal())
+        assertEquals(io.github.jaehun6912.remoteaccesshub.core.CrdOpenWith.App, m.crd.lastOpenWith)
+        // Windows에서 가져온 설정처럼 값이 없거나 모르는 값이면 기본(Auto)
+        assertEquals(io.github.jaehun6912.remoteaccesshub.core.CrdOpenWith.Auto, crdSettings().copy(crdOpenWith = "무엇이든").crdOpen)
+        val (back, _) = io.github.jaehun6912.remoteaccesshub.core.AppSettings.fromExportJson(crdSettings().copy(crdOpenWith = "app").toExportJson())
+        assertEquals(io.github.jaehun6912.remoteaccesshub.core.CrdOpenWith.App, back!!.crdOpen)
+    }
+
+    @Test
     fun crd_url_is_built_only_from_a_valid_host_id() {
         assertEquals("${RemoteLinks.CRD_ACCESS_URL}/session/$hostId", RemoteLinks.crdUrl(hostId))
         assertEquals("${RemoteLinks.CRD_ACCESS_URL}/session/$hostId", RemoteLinks.crdUrl("https://remotedesktop.google.com/access/session/$hostId?hl=ko"))

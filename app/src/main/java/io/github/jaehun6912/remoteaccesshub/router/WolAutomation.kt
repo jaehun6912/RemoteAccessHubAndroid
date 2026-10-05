@@ -58,13 +58,17 @@ class WolAutomation(
     /** 사용자 조작이 필요할 때 호출(공유기 화면을 띄우기 위함). */
     var userActionNeeded: (() -> Unit)? = null
 
+    /** 이번 PC 켜기를 시작한 시각(단계별 경과 시간을 기록에 남겨 느린 단계를 찾는다). */
+    private var startedMono = Mono.now()
+
     private fun stage(step: WolStep, status: StageStatus, message: String) {
-        log.info("[WOL $step] $status: $message")
+        log.info("[WOL $step +${"%.1f".format((Mono.now() - startedMono) / 1000.0)}초] $status: $message")
         stageChanged?.invoke(step, status, message)
     }
 
     /** @param skipNavigation 사용자가 이미 WOL 화면을 열어 둔 경우(수동 이동) true. */
     suspend fun wake(skipNavigation: Boolean, signal: CancelSignal): WolOutcome {
+        startedMono = Mono.now()
         val s = settings()
         val wake = RouterPages.safeRegex(s.wakeButtonPattern)
         val target = WolTarget(s.wolPcName, s.wolPcMac)
@@ -149,7 +153,7 @@ class WolAutomation(
         browser.waitFor(
             { p -> !p.markers.loadingOverlay && (p.markers.wakeButtons > 0 || p.containsText("등록된 WOL PC가 없습니다")) },
             6000,
-            400,
+            150,
             signal,
         )
 
@@ -299,7 +303,7 @@ class WolAutomation(
             var limit = if (dialogSeen && !dialogHandled) manualDeadline else deadline
             if (dialogSeen && dialogHandled) limit = clickMono + 25_000
             if (Mono.now() >= limit) break
-            signal.delay(500)
+            signal.delay(POLL_MS)
         }
 
         if (progressSeen) {
@@ -356,7 +360,7 @@ class WolAutomation(
 
             val until = Mono.now() + 3000
             while (Mono.now() < until) {
-                signal.delay(250)
+                signal.delay(150)
                 val after = browser.probe(signal)
                 if (dialogGone(after, confirmPattern, clickWall)) return true to tried.joinToString(" → ")
             }
@@ -373,6 +377,9 @@ class WolAutomation(
     companion object {
         /** WOL 요청이 공유기 화면에서 취소될 때 보내는 최대 횟수(처음 포함). WOL 신호는 여러 번 가도 PC에는 같은 결과다. */
         const val MAX_WAKE_ATTEMPTS = 5
+
+        /** 확인창·공유기 응답을 기다릴 때 화면·기록을 다시 읽는 간격. */
+        const val POLL_MS = 250L
 
         private val confirmLabel = Regex("^(확인|예|OK|Yes)$", RegexOption.IGNORE_CASE)
 

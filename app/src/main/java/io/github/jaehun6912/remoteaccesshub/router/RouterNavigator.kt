@@ -61,7 +61,7 @@ class RouterNavigator(
                 continue
             }
             if (Mono.now() >= deadline) return kind to snap
-            signal.delay(500)
+            signal.delay(250)
         }
     }
 
@@ -80,7 +80,7 @@ class RouterNavigator(
                 browser.ensureSemantics(3000, signal)
             }
             if (Mono.now() >= deadline) return false to last
-            signal.delay(500)
+            signal.delay(250)
         }
     }
 
@@ -223,7 +223,7 @@ class RouterNavigator(
             val now = Mono.now()
             if (now >= hardDeadline) return false to kind
             if (kind == RouterPageKind.ModeSelect && now >= unchangedDeadline) return false to kind
-            signal.delay(400)
+            signal.delay(250)
         }
     }
 
@@ -310,7 +310,7 @@ class RouterNavigator(
             signal.throwIfCancelled()
             val shows = browser.network.since(since, "wol/show")
             if (shows.any(::isOkListLoad)) {
-                signal.delay(300) // 목록 다시 그리기
+                signal.delay(150) // 목록 다시 그리기
                 report("WOL 목록 새로고침")
                 return true
             }
@@ -318,7 +318,7 @@ class RouterNavigator(
                 log.info("[$label] 누른 뒤 목록 요청도 끊김: ${shows.last().errorText}")
                 return false
             }
-            signal.delay(200)
+            signal.delay(150)
         }
         log.debug("새로고침 후 wol/show 정상 응답을 관찰하지 못함")
         return false

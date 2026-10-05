@@ -382,7 +382,7 @@ class RouterBrowser(
                 clicks++
                 log.debug("접근성 활성화 시도 $clicks: $r")
             }
-            signal.delay(500)
+            signal.delay(300)
         }
         return probe(signal).semanticsCount > 0
     }

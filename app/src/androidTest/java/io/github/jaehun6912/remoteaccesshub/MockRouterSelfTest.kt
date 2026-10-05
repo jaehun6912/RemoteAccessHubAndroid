@@ -48,7 +48,7 @@ class MockRouterSelfTest {
 
     private class RecordingCrd : CrdLauncher {
         val opened = mutableListOf<String>()
-        override fun open(hostId: String?): CrdOpenTarget {
+        override fun open(hostId: String?, openWith: io.github.jaehun6912.remoteaccesshub.core.CrdOpenWith): CrdOpenTarget {
             opened.add(RemoteLinks.crdUrl(hostId))
             return CrdOpenTarget.Browser
         }
@@ -57,9 +57,12 @@ class MockRouterSelfTest {
     private val rdp = RecordingRdp()
     private val crd = RecordingCrd()
     private var scenario: ActivityScenario<MainActivity>? = null
+    private var currentController: AppController? = null
 
     @After
     fun tearDown() {
+        // 단계별 소요 시간을 보려고 앱 기록을 logcat으로 내보낸다(adb logcat -s RAH-SELFTEST).
+        currentController?.log?.snapshot(2000)?.forEach { android.util.Log.i("RAH-SELFTEST", it.time.toLocalTime().toString() + " " + it.message) }
         scenario?.close()
         MainActivity.controllerFactory = null
     }
@@ -70,6 +73,7 @@ class MockRouterSelfTest {
         scenario = sc
         var c: AppController? = null
         sc.onActivity { c = it.controller }
+        currentController = c
         return c!!
     }
 

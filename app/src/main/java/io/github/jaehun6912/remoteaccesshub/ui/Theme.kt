@@ -1,6 +1,7 @@
 package io.github.jaehun6912.remoteaccesshub.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -105,7 +106,11 @@ fun AppTheme(themeSetting: String, content: @Composable () -> Unit) {
         )
     }
     CompositionLocalProvider(LocalPalette provides p) {
-        MaterialTheme(colorScheme = scheme, content = content)
+        MaterialTheme(colorScheme = scheme) {
+            // 바탕에 Surface가 없는 곳(머리글의 ⚙·⋯ 아이콘 등)도 테마 글자색을 쓰도록 기본 글자색을 정한다.
+            // 정하지 않으면 검은색이 기본이라 어두운 테마에서 아이콘이 보이지 않는다.
+            CompositionLocalProvider(LocalContentColor provides p.text, content = content)
+        }
     }
 }
 

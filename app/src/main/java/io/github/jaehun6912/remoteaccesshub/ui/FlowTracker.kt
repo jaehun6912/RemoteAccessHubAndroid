@@ -3,6 +3,7 @@ package io.github.jaehun6912.remoteaccesshub.ui
 import io.github.jaehun6912.remoteaccesshub.core.AppSettings
 import io.github.jaehun6912.remoteaccesshub.core.ConnectMode
 import io.github.jaehun6912.remoteaccesshub.core.CrdBootCheck
+import io.github.jaehun6912.remoteaccesshub.core.CrdOpenWith
 import io.github.jaehun6912.remoteaccesshub.core.InputRules
 import io.github.jaehun6912.remoteaccesshub.core.SessionState
 import io.github.jaehun6912.remoteaccesshub.core.WolMatchStatus
@@ -310,7 +311,11 @@ object ModeOptions {
     }
 
     private fun crdDetail(s: AppSettings): String {
-        val where = if (InputRules.normalizeCrdHostId(s.crdHostId) == null) "기기 목록에서 고르기" else "저장된 기기로 바로 연결"
+        val where = when {
+            InputRules.normalizeCrdHostId(s.crdHostId) == null -> "기기 목록에서 고르기"
+            s.crdOpen == CrdOpenWith.App -> "앱의 기기 목록에서 고르기"
+            else -> "브라우저로 저장된 기기 바로 연결"
+        }
         val check = if (s.crdCheck == CrdBootCheck.Direct) " · 부팅 확인: 일반 접속 주소" else " · 부팅 확인 없음"
         return where + check
     }

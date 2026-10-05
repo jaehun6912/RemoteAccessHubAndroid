@@ -280,7 +280,8 @@ class UiModelTest {
         val crd = ModeOptions.forSettings(s.copy(useCrd = true, crdHostId = "7f3a1b9c2d4e5f60"))
         assertEquals(2, crd.size)
         assertEquals(ConnectMode.Crd, crd[1].mode)
-        assertEquals("저장된 기기로 바로 연결 · 부팅 확인 없음", crd[1].detail)
+        assertEquals("브라우저로 저장된 기기 바로 연결 · 부팅 확인 없음", crd[1].detail)
+        assertEquals("앱의 기기 목록에서 고르기 · 부팅 확인 없음", ModeOptions.build(s.copy(useCrd = true, crdHostId = "7f3a1b9c2d4e5f60", crdOpenWith = "app"), ConnectMode.Crd).detail)
         assertTrue(ModeOptions.build(s.copy(useCrd = true, crdHostId = "", crdBootCheckMode = "direct"), ConnectMode.Crd).detail.contains("부팅 확인: 일반 접속 주소"))
 
         val empty = ModeOptions.build(AppSettings(), ConnectMode.Direct)

@@ -50,6 +50,7 @@ class SettingsDraft(private val base: AppSettings) {
     var useCrd by mutableStateOf(base.useCrd)
     var crdHostId by mutableStateOf(base.crdHostId)
     var crdCheck by mutableStateOf(if (base.crdBootCheckMode.trim().equals("direct", true)) "direct" else "none")
+    var crdOpenWith by mutableStateOf(if (base.crdOpenWith.trim().equals("app", true)) "app" else "auto")
     var powerCheck by mutableStateOf(if (base.powerCheckMode.trim().equals("off", true)) "off" else "auto")
     var powerSeconds by mutableStateOf(base.powerCheckSeconds.toString())
     var blink by mutableStateOf(base.blinkConnectWhenPcOn)
@@ -84,6 +85,7 @@ class SettingsDraft(private val base: AppSettings) {
             useCrd = useCrd,
             crdHostId = InputRules.normalizeCrdHostId(crdHostId) ?: crdHostId.trim(),
             crdBootCheckMode = crdCheck,
+            crdOpenWith = crdOpenWith,
             powerCheckMode = powerCheck,
             powerCheckSeconds = num(powerSeconds, "PC 전원 확인 주기"),
             blinkConnectWhenPcOn = blink,
@@ -197,6 +199,17 @@ fun SettingsScreen(c: AppController, modifier: Modifier) {
                 d.crdCheck,
                 { d.crdCheck = it },
                 hint = "크롬 원격 데스크톱은 열어 둔 포트가 없어 PC가 켜졌는지 확인할 방법이 없습니다. 확인하려면 위의 일반 접속 설정을 빌려 씁니다.",
+                enabled = d.useCrd,
+            )
+            RadioGroup(
+                "여는 방법",
+                listOf(
+                    "auto" to "기기 ID가 있으면 브라우저(Chrome)로 그 PC를 바로 열기",
+                    "app" to "항상 크롬 원격 데스크톱 앱으로 열기(기기 목록에서 고르기)",
+                ),
+                d.crdOpenWith,
+                { d.crdOpenWith = it },
+                hint = "크롬 원격 데스크톱 앱은 특정 PC로 바로 가는 주소를 받지 않아 첫 화면(기기 목록)만 엽니다. 바로 연결하려면 브라우저로 엽니다(구글 로그인·PIN은 브라우저에서 입력).",
                 enabled = d.useCrd,
             )
             OutlinedButton(onClick = { c.openCrdDeviceList() }, enabled = d.useCrd) { Text("기기 목록 열기") }

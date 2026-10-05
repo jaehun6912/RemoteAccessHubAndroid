@@ -48,7 +48,9 @@ class FakeRdpLauncher : RdpLauncher {
 class FakeCrdLauncher : CrdLauncher {
     val opened = mutableListOf<String>()
     var target = CrdOpenTarget.App
-    override fun open(hostId: String?): CrdOpenTarget {
+    var lastOpenWith: io.github.jaehun6912.remoteaccesshub.core.CrdOpenWith? = null
+    override fun open(hostId: String?, openWith: io.github.jaehun6912.remoteaccesshub.core.CrdOpenWith): CrdOpenTarget {
+        lastOpenWith = openWith
         opened.add(RemoteLinks.crdUrl(hostId))
         return target
     }

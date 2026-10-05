@@ -222,7 +222,7 @@ fun SettingsScreen(c: AppController, modifier: Modifier) {
                 { d.powerCheck = it },
                 hint = "윗줄 배지에 PC가 켜져 있는지 보여 줍니다. 응답이 없어도 꺼졌다고 단정하지 않습니다.",
             )
-            FieldRow("확인 주기(초)", d.powerSeconds, { d.powerSeconds = it }, "15~3600. 배지를 눌러 언제든 바로 확인할 수 있습니다.", keyboard = KeyboardType.Number)
+            FieldRow("확인 주기(초)", d.powerSeconds, { d.powerSeconds = it }, "1~3600. 짧을수록 빨리 알아채지만 데이터·배터리를 조금 더 씁니다. 배지를 눌러 언제든 바로 확인할 수 있습니다. (Windows 버전은 15초 이상)", keyboard = KeyboardType.Number)
             CheckRow("PC가 켜져 있으면 [PC 접속] 버튼을 천천히 깜빡이기", d.blink, { d.blink = it })
 
             SectionTitle("동작과 화면")

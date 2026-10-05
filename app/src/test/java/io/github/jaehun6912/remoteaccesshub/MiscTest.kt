@@ -132,7 +132,8 @@ class MiscTest {
 
     @Test
     fun out_of_range_interval_is_reported() {
-        for (sec in listOf(10, 5000)) {
+        assertTrue(AppSettings(routerUrl = "http://10.0.0.1:8080/", wolPcName = "PC-1", powerCheckSeconds = 1).validateRouter().isEmpty()) // 최소 1초
+        for (sec in listOf(0, 5000)) {
             val s = AppSettings(routerUrl = "http://10.0.0.1:8080/", wolPcName = "PC-1", powerCheckSeconds = sec)
             assertTrue(s.validateRouter().joinToString().contains("전원 확인 주기"))
         }
@@ -160,6 +161,22 @@ class MiscTest {
         paused = false
         w.checkNow()
         assertEquals(PcPowerState.NoAnswer, w.status.state)
+    }
+
+    @Test
+    fun watcher_with_one_second_interval_checks_again_after_a_second() = runBlocking {
+        val s = AppSettings(publicHost = "myhome.iptime.org", publicRdpPort = 41000, powerCheckSeconds = 1)
+        val port = FakePortProbe()
+        val w = PowerWatcher(port, AppLog(null), this, { s }, { false }, { false }).apply { probeTimeoutMs = 20 }
+        w.checkNow()
+        assertEquals(1, port.attempts)
+        w.tick()
+        delay(50)
+        assertEquals(1, port.attempts) // 아직 1초가 지나지 않음
+        delay(1100)
+        w.tick()
+        delay(100)
+        assertEquals(2, port.attempts)
     }
 
     @Test

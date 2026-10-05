@@ -135,7 +135,7 @@ class PowerWatcher(
             if (status.state == PcPowerState.Unknown || status.state == PcPowerState.Disabled) {
                 apply(PcPowerStatus(PcPowerState.Checking, target.via + " 확인 중", status.checkedAt))
             }
-            val open = probe.isOpen(target.host, target.port, probeTimeoutMs, sig)
+            val open = probe.isOpen(target.host, target.port, timeoutFor(s), sig)
             val next = PowerRules.decide(target, open, safe(routerLoggedIn), OffsetDateTime.now())
             if (next.state != status.state) log.debug("PC 전원 확인: ${next.pillText} (${next.detail})")
             apply(next)
@@ -153,7 +153,13 @@ class PowerWatcher(
         }
     }
 
-    private fun interval(s: AppSettings): Long = s.powerCheckSeconds.coerceIn(15, 3600) * 1000L
+    private fun interval(s: AppSettings): Long = s.powerCheckSeconds.coerceIn(AppSettings.MIN_POWER_CHECK_SECONDS, 3600) * 1000L
+
+    /**
+     * 한 번 확인할 때 기다리는 시간. 주기가 짧으면 함께 줄여(최소 1.5초) 꺼진 PC를 확인하느라 다음 확인이 밀리지 않게 한다.
+     * 켜진 PC는 보통 0.5초 안에 연결되므로 1.5초로도 충분하다.
+     */
+    private fun timeoutFor(s: AppSettings): Long = minOf(probeTimeoutMs, maxOf(1500L, s.powerCheckSeconds * 1000L))
 
     private fun safe(f: () -> Boolean): Boolean = try {
         f()

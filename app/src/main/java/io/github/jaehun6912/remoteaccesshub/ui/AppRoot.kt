@@ -132,10 +132,14 @@ fun AppRoot(c: AppController) {
     }
 }
 
-/** 이 층이 차지한 곳의 터치를 아래 층(공유기 화면)으로 넘기지 않는다. */
+/**
+ * 이 층이 차지한 곳의 터치를 아래 층(공유기 화면)으로 넘기지 않는다.
+ * 겹친 형제 중 위층이 터치를 받으면 아래층에는 전달되지 않으므로 받기만 하고 소비(consume)하지 않는다.
+ * 소비하면 스크롤이 "다른 곳에서 터치를 썼다"고 보고 스크롤을 취소한다(1.0.1까지 설정 화면 스크롤이 잘 안 되던 원인).
+ */
 fun Modifier.blockTouchesBelow(): Modifier = pointerInput(Unit) {
     awaitPointerEventScope {
-        while (true) awaitPointerEvent(PointerEventPass.Final).changes.forEach { it.consume() }
+        while (true) awaitPointerEvent(PointerEventPass.Final)
     }
 }
 

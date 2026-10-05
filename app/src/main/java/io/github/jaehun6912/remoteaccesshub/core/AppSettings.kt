@@ -211,7 +211,7 @@ data class AppSettings(
         } catch (_: Exception) {
             errors.add("PC 켜기 버튼 패턴(정규식)이 올바르지 않습니다.")
         }
-        if (powerCheckSeconds !in 15..3600) errors.add("PC 전원 확인 주기는 15~3600초 사이여야 합니다.")
+        if (powerCheckSeconds !in MIN_POWER_CHECK_SECONDS..3600) errors.add("PC 전원 확인 주기는 ${MIN_POWER_CHECK_SECONDS}~3600초 사이여야 합니다.")
         if (sessionProbeIntervalSeconds !in 5..600) errors.add("세션 확인 주기는 5~600초 사이여야 합니다.")
         if (automationLayoutWidth != 0 && automationLayoutWidth !in MIN_LAYOUT_WIDTH..MAX_LAYOUT_WIDTH) {
             errors.add("자동 조작 화면 너비는 0(휴대폰 너비) 또는 $MIN_LAYOUT_WIDTH~${MAX_LAYOUT_WIDTH} 사이여야 합니다.")
@@ -250,6 +250,8 @@ data class AppSettings(
     companion object {
         /** 설정 파일 형식 버전(Windows 버전과 같은 번호를 쓴다). */
         const val CURRENT_SETTINGS_VERSION = 3
+        /** PC 전원 확인 최소 주기(초). Windows 버전은 15초부터 받는다. */
+        const val MIN_POWER_CHECK_SECONDS = 1
         const val MIN_LAYOUT_WIDTH = 600
         const val MAX_LAYOUT_WIDTH = 2400
 
